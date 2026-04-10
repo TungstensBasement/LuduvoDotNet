@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="LuduvoDotNet.Example/LuduvoDotNet.Example.csproj" />
+  <Project Path="LuduvoDotNet/LuduvoDotNet.csproj" />
+</Solution>
