@@ -4,12 +4,22 @@
         <TargetFramework>net10.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
-        <Version>0.0.1</Version>
+        <Version>0.1.0</Version>
         <Title>LuduvoDotNet</Title>
         <Authors>Tungsten</Authors>
         <Description>Luduvo api wrapper for .net </Description>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
         <NoWarn>$(NoWarn)</NoWarn>
+        <PackageProjectUrl>https://github.com/TungstensBasement/LuduvoDotNet</PackageProjectUrl>
+        <PackageLicenseUrl>raw.githubusercontent.com/TungstensBasement/LuduvoDotNet/refs/heads/master/LICENSE</PackageLicenseUrl>
+        <PackageIcon>logo.png</PackageIcon>
     </PropertyGroup>
+
+    <ItemGroup>
+      <None Update="logo.png">
+        <Pack>True</Pack>
+        <PackagePath></PackagePath>
+      </None>
+    </ItemGroup>
 
 </Project>
