@@ -1,0 +1,87 @@
+name: Publish NuGet Package
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Package version (optional, e.g. 1.2.3). If empty, version comes from tag or csproj."
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+env:
+  DOTNET_VERSION: "10.0.x"
+  PROJECT_PATH: "LuduvoDotNet/LuduvoDotNet.csproj"
+  BUILD_CONFIGURATION: "Release"
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Resolve package version
+        id: version
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [[ "${GITHUB_EVENT_NAME}" == "workflow_dispatch" && -n "${{ inputs.version }}" ]]; then
+            VERSION="${{ inputs.version }}"
+            echo "Using manual version input: ${VERSION}"
+          elif [[ "${GITHUB_REF}" == refs/tags/v* ]]; then
+            VERSION="${GITHUB_REF#refs/tags/v}"
+            echo "Using version from tag: ${VERSION}"
+          else
+            VERSION="$(grep -oPm1 '(?<=<Version>)[^<]+' "$PROJECT_PATH" || true)"
+            if [[ -z "$VERSION" ]]; then
+              echo "Could not resolve package version from input, tag, or csproj"
+              exit 1
+            fi
+            echo "Using version from csproj: ${VERSION}"
+          fi
+
+          if ! [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+([-.][0-9A-Za-z.-]+)?$ ]]; then
+            echo "Invalid version format: $VERSION"
+            exit 1
+          fi
+
+          echo "package_version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Restore
+        run: dotnet restore LuduvoDotNet.slnx
+
+      - name: Build
+        run: dotnet build LuduvoDotNet.slnx --configuration "$BUILD_CONFIGURATION" --no-restore
+
+      - name: Test
+        run: dotnet test LuduvoDotNet.slnx --configuration "$BUILD_CONFIGURATION" --no-build
+
+      - name: Pack
+        run: |
+          dotnet pack "$PROJECT_PATH" \
+            --configuration "$BUILD_CONFIGURATION" \
+            --no-build \
+            --output ./artifacts \
+            /p:ContinuousIntegrationBuild=true \
+            /p:PackageVersion=${{ steps.version.outputs.package_version }}
+
+      - name: Push to NuGet
+        run: |
+          dotnet nuget push "./artifacts/*.nupkg" \
+            --source "https://api.nuget.org/v3/index.json" \
+            --api-key "${{ secrets.NUGET_API_KEY }}" \
+            --skip-duplicate
+
