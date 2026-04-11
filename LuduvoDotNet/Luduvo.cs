@@ -31,18 +31,19 @@ public class Luduvo
     /// Fetches a user profile by ID from <c>/users/{userId}/profile</c> and deserializes it into <see cref="User"/>.
     /// </summary>
     /// <param name="userId">The numeric user identifier.</param>
+    /// <param name="cancellationToken">Optional cancellation token to cancel the request.</param>
     /// <returns>The deserialized user profile.</returns>
     /// <exception cref="UserNotFoundException">Thrown when the API returns 404 or an empty payload.</exception>
     /// <exception cref="TooManyRequestsException">Thrown when the API rate limits the request.</exception>
-    public async Task<User> GetUserByIdAsync(uint userId)
+    public async Task<User> GetUserByIdAsync(uint userId, CancellationToken cancellationToken = default)
     {
-        var response=await _httpClient.GetAsync($"/users/{userId}/profile");
+        var response=await _httpClient.GetAsync($"/users/{userId}/profile",cancellationToken);
         if (response.StatusCode == HttpStatusCode.NotFound)
             throw new UserNotFoundException();
         if(response.StatusCode == HttpStatusCode.TooManyRequests)
             throw new TooManyRequestsException();
         response.EnsureSuccessStatusCode();
-        var user=await response.Content.ReadFromJsonAsync<User>(_jsonOptions);
+        var user=await response.Content.ReadFromJsonAsync<User>(_jsonOptions, cancellationToken);
         if (user is null) throw new UserNotFoundException();
         return user;
     }

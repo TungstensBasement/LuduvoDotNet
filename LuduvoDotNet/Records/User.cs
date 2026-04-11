@@ -17,7 +17,7 @@ public record User
         ushort FriendCount,
         ushort PlaceCount,
         ushort ItemCount,
-        ulong LastActive,
+        ulong? LastActive,
         bool AllowJoins,
         bool IsOwner
     );
