@@ -8,6 +8,10 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <PackageReference Include="Spectre.Console" Version="0.55.0" />
+    </ItemGroup>
+
+    <ItemGroup>
       <ProjectReference Include="..\LuduvoDotNet\LuduvoDotNet.csproj" />
     </ItemGroup>
 

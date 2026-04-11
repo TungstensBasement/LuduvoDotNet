@@ -27,7 +27,6 @@ public class Luduvo
     {
         
     }
-
     /// <summary>
     /// Fetches a user profile by ID from <c>/users/{userId}/profile</c> and deserializes it into <see cref="User"/>.
     /// </summary>
@@ -46,5 +45,15 @@ public class Luduvo
         var user=await response.Content.ReadFromJsonAsync<User>(_jsonOptions);
         if (user is null) throw new UserNotFoundException();
         return user;
+    }
+
+    public async Task<PartialUser[]> SearchUsersAsync(string username)
+    {
+        var response=await _httpClient.GetAsync($"/users?q={WebUtility.UrlEncode(username)}");
+        if(response.StatusCode == HttpStatusCode.TooManyRequests)
+            throw new TooManyRequestsException();
+        response.EnsureSuccessStatusCode();
+        var users=await response.Content.ReadFromJsonAsync<PartialUser[]>(_jsonOptions);
+        return users ?? Array.Empty<PartialUser>();
     }
 }

@@ -1,4 +1,5 @@
 <Solution>
   <Project Path="LuduvoDotNet.Example/LuduvoDotNet.Example.csproj" />
+  <Project Path="LuduvoDotNet.Tests/LuduvoDotNet.Tests.csproj" Id="3868d69f-2f4b-4249-8758-d102c816d680" />
   <Project Path="LuduvoDotNet/LuduvoDotNet.csproj" />
 </Solution>
