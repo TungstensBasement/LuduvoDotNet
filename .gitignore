@@ -429,3 +429,15 @@ FodyWeavers.xsd
 
 # Rider files
 .idea/
+
+# DocFX build output
+_site/
+
+# Generated API metadata
+api/
+
+# Cache (speeds up rebuilds, not needed in repo)
+.cache/
+
+# Optional temp/debug folders
+.temp/

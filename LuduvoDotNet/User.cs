@@ -1,5 +1,8 @@
 namespace LuduvoDotNet;
 
+/// <summary>
+/// Represents a user profile returned by the Luduvo API.
+/// </summary>
 public record User
     (
         uint UserId,
