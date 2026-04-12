@@ -11,7 +11,7 @@
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
         <NoWarn>$(NoWarn)</NoWarn>
         <PackageProjectUrl>https://github.com/TungstensBasement/LuduvoDotNet</PackageProjectUrl>
-        <PackageLicenseUrl>raw.githubusercontent.com/TungstensBasement/LuduvoDotNet/refs/heads/master/LICENSE</PackageLicenseUrl>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
         <PackageIcon>logo.png</PackageIcon>
     </PropertyGroup>
 
