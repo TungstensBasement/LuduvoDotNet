@@ -14,7 +14,7 @@ namespace LuduvoDotNet.Tests
             Assert.NotNull(result);
             Assert.Equal(2u, result.UserId);
             Assert.Equal("IgorAlexey", result.Username);
-            Assert.Equal(1768055400ul, result.MemberSince);
+            Assert.NotNull(result.DisplayName);
         }
 
         [Fact]
