@@ -1,40 +1,91 @@
-﻿using LuduvoDotNet;
+﻿using System.Net.Http;
+using LuduvoDotNet;
 using Spectre.Console;
 
 Luduvo luduvo = new();
-displayMainMenu();
-void displayMainMenu()
+await DisplayMainMenuAsync();
+
+async Task DisplayMainMenuAsync()
 {
     var option = AnsiConsole.Prompt(new SelectionPrompt<string>()
         .Title("Select api")
         .AddChoices("User API", "Quit")
     );
-    if (option == "User API") showUserApiMenu();
-    else if (option == "Quit") Environment.Exit(0);
-}
-void showUserApiMenu()
-{
-    var option = AnsiConsole.Prompt(new SelectionPrompt<string>()
-        .Title("Select option")
-        .AddChoices("Get user by id", "Search users by username", "Back")
-    );
-    if(option=="Get user by id")
+
+    if (option == "User API")
     {
-        var result=AnsiConsole.Ask<uint>("User ID");
-        AnsiConsole.Status().Start("Awaiting API response...", async ctx =>
-        {
-            var response = luduvo.GetUserByIdAsync(result).Result;
-            AnsiConsole.WriteLine(response.ToString());
-        });
-        showUserApiMenu();
-    }
-    else if(option == "Search users by username")
-    {
-        throw new NotImplementedException();
-    }
-    else if(option=="Back")
-    {
-        displayMainMenu();
+        await ShowUserApiMenuAsync();
+        await DisplayMainMenuAsync();
     }
 }
 
+async Task ShowUserApiMenuAsync()
+{
+    while (true)
+    {
+        var option = AnsiConsole.Prompt(new SelectionPrompt<string>()
+            .Title("Select option")
+            .AddChoices("Get user by id", "Search users by username", "Back")
+        );
+
+        if (option == "Get user by id")
+        {
+            var result = AnsiConsole.Ask<uint>("User ID:");
+            await AnsiConsole.Status().StartAsync("Awaiting API response...", async _ =>
+            {
+                try
+                {
+                    var response = await luduvo.GetUserByIdAsync(result);
+                    AnsiConsole.WriteLine(response.ToString());
+                }
+                catch (UserNotFoundException)
+                {
+                    AnsiConsole.MarkupLine("[red]User was not found.[/]");
+                }
+                catch (TooManyRequestsException)
+                {
+                    AnsiConsole.MarkupLine("[yellow]Rate limit reached. Please try again in a moment.[/]");
+                }
+                catch (HttpRequestException ex)
+                {
+                    AnsiConsole.MarkupLine($"[red]Network/API error: {ex.Message}[/]");
+                }
+                catch (Exception ex)
+                {
+                    AnsiConsole.MarkupLine($"[red]Unexpected error: {ex.Message}[/]");
+                }
+            });
+        }
+        else if (option == "Search users by username")
+        {
+            var result =AnsiConsole.Ask<string>("Username:");
+            await AnsiConsole.Status().StartAsync("Awaiting API response...", async _ =>
+            {
+                try
+                {
+                    var response = await luduvo.SearchUsersAsync(result);
+                    foreach (var partialUser in response)
+                    {
+                        AnsiConsole.WriteLine(partialUser.ToString());
+                    }
+                }
+                catch (TooManyRequestsException)
+                {
+                    AnsiConsole.MarkupLine("[yellow]Rate limit reached. Please try again in a moment.[/]");
+                }
+                catch (HttpRequestException ex)
+                {
+                    AnsiConsole.MarkupLine($"[red]Network/API error: {ex.Message}[/]");
+                }
+                catch (Exception ex)
+                {
+                    AnsiConsole.MarkupLine($"[red]Unexpected error: {ex.Message}[/]");
+                }
+            });
+        }
+        else if (option == "Back")
+        {
+            return;
+        }
+    }
+}
