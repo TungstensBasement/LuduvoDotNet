@@ -68,6 +68,13 @@ public class Luduvo
         return user;
     }
 
+    /// <summary>
+    /// Searches users by username using <c>/users?q={username}</c> and returns lightweight profile entries.
+    /// </summary>
+    /// <param name="username">Username query text. The value is URL-encoded before sending.</param>
+    /// <returns>An array of matching <see cref="PartialUser"/> entries, or an empty array when no users match.</returns>
+    /// <exception cref="TooManyRequestsException">Thrown when the API rate limits the request.</exception>
+    /// <exception cref="HttpRequestException">Thrown when the API returns a non-success status code other than 429.</exception>
     public async Task<PartialUser[]> SearchUsersAsync(string username)
     {
         var response = await _httpClient.GetAsync($"/users?q={WebUtility.UrlEncode(username)}");
