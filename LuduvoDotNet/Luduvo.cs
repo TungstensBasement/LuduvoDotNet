@@ -14,7 +14,7 @@ public class Luduvo
     private static readonly JsonSerializerOptions _jsonOptions = new(JsonSerializerDefaults.Web)
     {
         PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower,
-        Converters = { new HexColorJsonConverter() }
+        Converters = { new HexColorJsonConverter(), new LongDateTimeJsonConverter()}
     };
 
     private static readonly HttpClient _sharedHttpClient = new()

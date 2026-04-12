@@ -2,7 +2,7 @@
   href: introduction.md
 - name: Getting Started
   href: getting-started.md
-- name: Tutorial: Get User By ID
+- name: "Tutorial: Get User By ID"
   href: tutorial-get-user-by-id.md
-- name: Tutorial: Search Users
+- name: "Tutorial: Search Users"
   href: tutorial-search-users.md

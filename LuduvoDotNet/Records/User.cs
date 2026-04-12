@@ -1,3 +1,5 @@
+using System;
+
 namespace LuduvoDotNet;
 
 /// <summary>
@@ -7,7 +9,7 @@ public record User
     (
         uint UserId,
         string Username,
-        ulong MemberSince,
+        DateTime MemberSince,
         string DisplayName,
         string? Status,
         string? Bio,
@@ -17,7 +19,7 @@ public record User
         ushort FriendCount,
         ushort PlaceCount,
         ushort ItemCount,
-        ulong? LastActive,
+        DateTime? LastActive,
         bool AllowJoins,
         bool IsOwner
     );
