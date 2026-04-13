@@ -1,5 +1,4 @@
-﻿using System.Net.Http;
-using LuduvoDotNet;
+﻿using LuduvoDotNet;
 using Spectre.Console;
 
 Luduvo luduvo = new();
@@ -25,7 +24,7 @@ async Task ShowUserApiMenuAsync()
     {
         var option = AnsiConsole.Prompt(new SelectionPrompt<string>()
             .Title("Select option")
-            .AddChoices("Get user by id", "Search users by username", "Back")
+            .AddChoices("Get user by id", "Search users by username","Show recent users", "Back")
         );
 
         if (option == "Get user by id")
@@ -64,6 +63,32 @@ async Task ShowUserApiMenuAsync()
                 try
                 {
                     var response = await luduvo.SearchUsersAsync(result);
+                    foreach (var partialUser in response)
+                    {
+                        AnsiConsole.WriteLine(partialUser.ToString());
+                    }
+                }
+                catch (TooManyRequestsException)
+                {
+                    AnsiConsole.MarkupLine("[yellow]Rate limit reached. Please try again in a moment.[/]");
+                }
+                catch (HttpRequestException ex)
+                {
+                    AnsiConsole.MarkupLine($"[red]Network/API error: {ex.Message}[/]");
+                }
+                catch (Exception ex)
+                {
+                    AnsiConsole.MarkupLine($"[red]Unexpected error: {ex.Message}[/]");
+                }
+            });
+        }
+        else if (option == "Show recent users")
+        {
+            await AnsiConsole.Status().StartAsync("Awaiting API response...", async _ =>
+            {
+                try
+                {
+                    var response = await luduvo.SearchUsersAsync(null,100,0);
                     foreach (var partialUser in response)
                     {
                         AnsiConsole.WriteLine(partialUser.ToString());

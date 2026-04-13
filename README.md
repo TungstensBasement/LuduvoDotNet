@@ -2,6 +2,8 @@
 
 ![LuduvoDotNet logo](wordmark.svg)
 [![NuGet](https://img.shields.io/nuget/v/LuduvoDotNet.svg)](https://www.nuget.org/packages/LuduvoDotNet/)
+[![Documentation](https://img.shields.io/badge/docs-latest-blue.svg)](https://tungstensbasement.github.io/LuduvoDotNet/)  
+
 `LuduvoDotNet` is a modern .NET wrapper for the Luduvo API.
 
 > [!CAUTION]
