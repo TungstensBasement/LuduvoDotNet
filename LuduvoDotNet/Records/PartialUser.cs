@@ -1,6 +1,6 @@
 ﻿using System.Drawing;
 
-namespace LuduvoDotNet
+namespace LuduvoDotNet.Records
 {
     /// <summary>
     /// Lightweight user data returned by user search endpoints.

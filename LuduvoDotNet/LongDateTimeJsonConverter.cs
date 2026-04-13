@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 
 namespace LuduvoDotNet;
 
-public class LongDateTimeJsonConverter:JsonConverter<DateTime>
+internal class LongDateTimeJsonConverter:JsonConverter<DateTime>
 {
     public override DateTime Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {

@@ -16,7 +16,6 @@ namespace LuduvoDotNet.Tests
             Assert.Equal("IgorAlexey", result.Username);
             Assert.NotNull(result.DisplayName);
         }
-
         [Fact]
         public async Task GetUserByIdAsync_Should_ThrowUserNotFoundException_WhenApiReturns404()
         {

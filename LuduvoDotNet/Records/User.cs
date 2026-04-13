@@ -1,6 +1,6 @@
 using System;
 
-namespace LuduvoDotNet;
+namespace LuduvoDotNet.Records;
 
 /// <summary>
 /// Represents a user profile returned by the Luduvo API.

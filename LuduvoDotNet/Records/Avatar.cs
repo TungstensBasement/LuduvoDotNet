@@ -1,6 +1,6 @@
 using System.Drawing;
 
-namespace LuduvoDotNet;
+namespace LuduvoDotNet.Records;
 
 /// <summary>
 /// Avatar appearance returned by the API.

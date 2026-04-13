@@ -58,7 +58,7 @@ async Task ShowUserApiMenuAsync()
         }
         else if (option == "Search users by username")
         {
-            var result =AnsiConsole.Ask<string>("Username:");
+            var result =AnsiConsole.Ask<string?>("Username:");
             await AnsiConsole.Status().StartAsync("Awaiting API response...", async _ =>
             {
                 try
