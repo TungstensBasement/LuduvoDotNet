@@ -1,16 +1,24 @@
 # LuduvoDotNet
 
-`LuduvoDotNet` is a modern .NET wrapper around the Luduvo API.
+![LuduvoDotNet logo](wordmark.svg)
+[![NuGet](https://img.shields.io/nuget/v/LuduvoDotNet.svg)](https://www.nuget.org/packages/LuduvoDotNet/)
+`LuduvoDotNet` is a modern .NET wrapper for the Luduvo API.
+
+> [!CAUTION]
+> This library and the Luduvo API are in early development and may introduce breaking changes.
+
+## Links
+
+- Documentation: https://tungstensbasement.github.io/LuduvoDotNet/
+- NuGet package: https://www.nuget.org/packages/LuduvoDotNet/
 
 ## Installation
-
-You can install the package via NuGet:
 
 ```bash
 dotnet add package LuduvoDotNet
 ```
 
-## Usage
+## Quick start
 
 ```csharp
 using LuduvoDotNet;
@@ -18,12 +26,14 @@ using LuduvoDotNet;
 var client = new Luduvo();
 var user = await client.GetUserByIdAsync(2);
 
-Console.WriteLine(user.Username);
-Console.WriteLine(user.Avatar.head_color);
+Console.WriteLine($"User: {user.Username}");
+Console.WriteLine($"Head color: {user.Avatar.head_color}");
 ```
 
 ## Disclaimer
-This library is an unofficial wrapper around the Luduvo API. It is not affiliated with or endorsed by Luduvo.
+
+This library is an unofficial wrapper around the Luduvo API and is not affiliated with or endorsed by Luduvo.
+
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
