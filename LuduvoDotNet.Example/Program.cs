@@ -8,7 +8,7 @@ async Task DisplayMainMenuAsync()
 {
     var option = AnsiConsole.Prompt(new SelectionPrompt<string>()
         .Title("Select api")
-        .AddChoices("User API", "Quit")
+        .AddChoices("User API","Places API", "Quit")
     );
 
     if (option == "User API")
@@ -16,6 +16,13 @@ async Task DisplayMainMenuAsync()
         await ShowUserApiMenuAsync();
         await DisplayMainMenuAsync();
     }
+
+    if (option == "Places API")
+    {
+        await ShowPlacesMenuAsync();
+        await DisplayMainMenuAsync();
+    }
+        
 }
 
 async Task ShowUserApiMenuAsync()
@@ -113,4 +120,67 @@ async Task ShowUserApiMenuAsync()
             return;
         }
     }
+}
+
+async Task ShowPlacesMenuAsync()
+{
+    var option = AnsiConsole.Prompt(new SelectionPrompt<string>()
+        .Title("Select option")
+        .AddChoices("Get place by id", "Search places", "Back"));
+    if (option == "Get place by id")
+    {
+        var result = AnsiConsole.Ask<uint>("User ID:");
+        await AnsiConsole.Status().StartAsync("Awaiting API response...", async _ =>
+        {
+            try
+            {
+                var response = await luduvo.GetPlaceByIdAsync(result);
+                AnsiConsole.WriteLine(response.ToString());
+            }
+            catch (UserNotFoundException)
+            {
+                AnsiConsole.MarkupLine("[red]User was not found.[/]");
+            }
+            catch (TooManyRequestsException)
+            {
+                AnsiConsole.MarkupLine("[yellow]Rate limit reached. Please try again in a moment.[/]");
+            }
+            catch (HttpRequestException ex)
+            {
+                AnsiConsole.MarkupLine($"[red]Network/API error: {ex.Message}[/]");
+            }
+            catch (Exception ex)
+            {
+                AnsiConsole.MarkupLine($"[red]Unexpected error: {ex.Message}[/]");
+            }
+        });
+    }
+    else if (option == "Search places")
+    {
+        var result = AnsiConsole.Ask<string>("Search places:");
+        await AnsiConsole.Status().StartAsync("Awaiting API response...", async _ =>
+        {
+            try
+            {
+                var response = await luduvo.SearchPlacesAsync(result);
+                foreach (var partialUser in response)
+                {
+                    AnsiConsole.WriteLine(partialUser.ToString());
+                }
+            }
+            catch (TooManyRequestsException)
+            {
+                AnsiConsole.MarkupLine("[yellow]Rate limit reached. Please try again in a moment.[/]");
+            }
+            catch (HttpRequestException ex)
+            {
+                AnsiConsole.MarkupLine($"[red]Network/API error: {ex.Message}[/]");
+            }
+            catch (Exception ex)
+            {
+                AnsiConsole.MarkupLine($"[red]Unexpected error: {ex.Message}[/]");
+            }
+        });
+    }
+        
 }

@@ -52,8 +52,8 @@ public partial class Luduvo
     /// <exception cref="ArgumentOutOfRangeException">Thrown when <paramref name="limit"/> or <paramref name="offset"/> are outside valid range.</exception>
     public async Task<PartialUser[]> SearchUsersAsync(string? username, int? limit, int? offset, CancellationToken cancellationToken = default)
     {
-        if (limit is <= 0)
-            throw new ArgumentOutOfRangeException(nameof(limit), "limit must be greater than 0.");
+        if (limit is <= 0 or >= 100)
+            throw new ArgumentOutOfRangeException(nameof(limit), "limit must be greater than 0 and less than 100.");
         if (offset is < 0)
             throw new ArgumentOutOfRangeException(nameof(offset), "offset must be 0 or greater.");
 

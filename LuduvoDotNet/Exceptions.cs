@@ -19,3 +19,13 @@ public class TooManyRequestsException:Exception
     /// </summary>
     public TooManyRequestsException() { }
 }
+/// <summary>
+/// Exception thrown when a place is not found by the API. This can occur when requesting a place by an invalid ID
+/// </summary>
+public class PlaceNotFoundException:Exception
+{
+    /// <summary>
+    /// Exception thrown when a place is not found by the API. This can occur when requesting a place by an invalid ID
+    /// </summary>
+    public PlaceNotFoundException() { }
+}
