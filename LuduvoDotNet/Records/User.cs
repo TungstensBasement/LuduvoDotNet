@@ -1,4 +1,5 @@
 using System;
+using System.Drawing;
 
 namespace LuduvoDotNet.Records;
 
@@ -14,7 +15,9 @@ public record User
         string? Status,
         string? Bio,
         Avatar Avatar,
-        List<Item> EquippedItems,
+        Color? AccentColor,
+        Uri? BannerUrl,
+        List<PartialItem> EquippedItems,
         List<Badge> Badges,
         ushort FriendCount,
         ushort PlaceCount,

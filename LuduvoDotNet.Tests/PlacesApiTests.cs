@@ -44,7 +44,7 @@ public class PlacesApiTests
         var places = await luduvo.SearchPlacesAsync("test", limit: 20, offset: 0);
 
         Assert.Single(places);
-        Assert.Equal("Test2", places[0].title);
+        Assert.Equal("Test2", places[0].Title);
     }
 
     [Fact]

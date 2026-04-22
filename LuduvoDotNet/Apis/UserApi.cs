@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
 using LuduvoDotNet.Records;
@@ -83,5 +84,39 @@ public partial class Luduvo
         }
 
         return Array.Empty<PartialUser>();
+    }
+    
+    [Experimental("EXP001", Message = "This method is under testing and is subjected to changes")]
+    public async Task<InventoryItem[]> GetUserInventotoryAsync(int id, int? limit, int? offset, CancellationToken cancellationToken = default)
+    {
+        if (limit is <= 0 or >= 100)
+            throw new ArgumentOutOfRangeException(nameof(limit), "limit must be greater than 0 and less than 100.");
+        if (offset is < 0)
+            throw new ArgumentOutOfRangeException(nameof(offset), "offset must be 0 or greater.");
+        var path = $"/users/{id}/inventory";
+        if (limit.HasValue) path += $"&limit={limit.Value}";
+        if (offset.HasValue) path += $"&offset={offset.Value}";
+
+        var response = await _httpClient.GetAsync(path, cancellationToken);
+        if (response.StatusCode == HttpStatusCode.TooManyRequests)
+            throw new TooManyRequestsException();
+        response.EnsureSuccessStatusCode();
+
+        using var document = await JsonDocument.ParseAsync(await response.Content.ReadAsStreamAsync(cancellationToken), cancellationToken: cancellationToken);
+        var root = document.RootElement;
+
+        if (root.ValueKind == JsonValueKind.Array)
+        {
+            return root.Deserialize<InventoryItem[]>(_jsonOptions) ?? Array.Empty<InventoryItem>();
+        }
+
+        if (root.ValueKind == JsonValueKind.Object &&
+            root.TryGetProperty("items", out var usersElement) &&
+            usersElement.ValueKind == JsonValueKind.Array)
+        {
+            return usersElement.Deserialize<InventoryItem[]>(_jsonOptions) ?? Array.Empty<InventoryItem>();
+        }
+
+        return Array.Empty<InventoryItem>();
     }
 }
