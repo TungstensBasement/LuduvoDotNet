@@ -53,8 +53,8 @@ public partial class Luduvo
     /// <exception cref="ArgumentOutOfRangeException">Thrown when <paramref name="limit"/> or <paramref name="offset"/> are outside valid range.</exception>
     public async Task<PartialUser[]> SearchUsersAsync(string? username, int? limit, int? offset, CancellationToken cancellationToken = default)
     {
-        if (limit is <= 0 or >= 100)
-            throw new ArgumentOutOfRangeException(nameof(limit), "limit must be greater than 0 and less than 100.");
+        if (limit is <= 0 or > 100)
+            throw new ArgumentOutOfRangeException(nameof(limit), "limit must be greater than 0 and less or equal 100.");
         if (offset is < 0)
             throw new ArgumentOutOfRangeException(nameof(offset), "offset must be 0 or greater.");
 
@@ -86,18 +86,30 @@ public partial class Luduvo
         return Array.Empty<PartialUser>();
     }
     
-    [Experimental("EXP001", Message = "This method is under testing and is subjected to changes")]
+    public Task<InventoryItem[]> GetUserInventotoryAsync(int id, CancellationToken cancellationToken = default)
+        => GetUserInventotoryAsync(id, limit: null, offset: null, cancellationToken: cancellationToken);
+    
     public async Task<InventoryItem[]> GetUserInventotoryAsync(int id, int? limit, int? offset, CancellationToken cancellationToken = default)
     {
-        if (limit is <= 0 or >= 100)
-            throw new ArgumentOutOfRangeException(nameof(limit), "limit must be greater than 0 and less than 100.");
+        if (limit is <= 0 or > 100)
+            throw new ArgumentOutOfRangeException(nameof(limit), "limit must be greater than 0 and less or equal 100.");
         if (offset is < 0)
             throw new ArgumentOutOfRangeException(nameof(offset), "offset must be 0 or greater.");
+
         var path = $"/users/{id}/inventory";
-        if (limit.HasValue) path += $"&limit={limit.Value}";
-        if (offset.HasValue) path += $"&offset={offset.Value}";
+        var hasQuery = false;
+        if (limit.HasValue)
+        {
+            path += $"?limit={limit.Value}";
+            hasQuery = true;
+        }
+
+        if (offset.HasValue)
+            path += hasQuery ? $"&offset={offset.Value}" : $"?offset={offset.Value}";
 
         var response = await _httpClient.GetAsync(path, cancellationToken);
+        if (response.StatusCode == HttpStatusCode.NotFound)
+            throw new UserNotFoundException();
         if (response.StatusCode == HttpStatusCode.TooManyRequests)
             throw new TooManyRequestsException();
         response.EnsureSuccessStatusCode();

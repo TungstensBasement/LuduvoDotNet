@@ -13,10 +13,10 @@ try
 {
     var place = await client.GetPlaceByIdAsync(1);
 
-    Console.WriteLine($"ID: {place.id}");
-    Console.WriteLine($"Title: {place.title}");
-    Console.WriteLine($"Owner: {place.owner_username}");
-    Console.WriteLine($"Visits: {place.visit_count}");
+    Console.WriteLine($"ID: {place.Id}");
+    Console.WriteLine($"Title: {place.Title}");
+    Console.WriteLine($"Owner: {place.OwnerUsername}");
+    Console.WriteLine($"Visits: {place.VisitCount}");
 }
 catch (PlaceNotFoundException)
 {

@@ -29,3 +29,14 @@ public class PlaceNotFoundException:Exception
     /// </summary>
     public PlaceNotFoundException() { }
 }
+
+/// <summary>
+/// Exception thrown when a store item is not found by the API.
+/// </summary>
+public class StoreItemNotFoundException:Exception
+{
+    /// <summary>
+    /// Exception thrown when a store item is not found by the API.
+    /// </summary>
+    public StoreItemNotFoundException() { }
+}

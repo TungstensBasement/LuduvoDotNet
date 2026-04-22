@@ -1,28 +1,23 @@
 ﻿using LuduvoDotNet;
 using Spectre.Console;
 
-Luduvo luduvo = new();
-await DisplayMainMenuAsync();
+var luduvo = new Luduvo();
 
-async Task DisplayMainMenuAsync()
+while (true)
 {
     var option = AnsiConsole.Prompt(new SelectionPrompt<string>()
-        .Title("Select api")
-        .AddChoices("User API","Places API", "Quit")
-    );
+        .Title("Select API")
+        .AddChoices("User API", "Places API", "Store API", "Quit"));
+
+    if (option == "Quit")
+        return;
 
     if (option == "User API")
-    {
         await ShowUserApiMenuAsync();
-        await DisplayMainMenuAsync();
-    }
-
-    if (option == "Places API")
-    {
+    else if (option == "Places API")
         await ShowPlacesMenuAsync();
-        await DisplayMainMenuAsync();
-    }
-        
+    else if (option == "Store API")
+        await ShowStoreMenuAsync();
 }
 
 async Task ShowUserApiMenuAsync()
@@ -31,156 +26,165 @@ async Task ShowUserApiMenuAsync()
     {
         var option = AnsiConsole.Prompt(new SelectionPrompt<string>()
             .Title("Select option")
-            .AddChoices("Get user by id", "Search users by username","Show recent users", "Back")
-        );
+            .AddChoices("Get user by id", "Search users by username", "Get user inventory", "Back"));
+
+        if (option == "Back")
+            return;
 
         if (option == "Get user by id")
         {
-            var result = AnsiConsole.Ask<uint>("User ID:");
-            await AnsiConsole.Status().StartAsync("Awaiting API response...", async _ =>
+            var id = AnsiConsole.Ask<uint>("User ID:");
+            await RunWithHandlingAsync(async () =>
             {
-                try
-                {
-                    var response = await luduvo.GetUserByIdAsync(result);
-                    AnsiConsole.WriteLine(response.ToString());
-                }
-                catch (UserNotFoundException)
-                {
-                    AnsiConsole.MarkupLine("[red]User was not found.[/]");
-                }
-                catch (TooManyRequestsException)
-                {
-                    AnsiConsole.MarkupLine("[yellow]Rate limit reached. Please try again in a moment.[/]");
-                }
-                catch (HttpRequestException ex)
-                {
-                    AnsiConsole.MarkupLine($"[red]Network/API error: {ex.Message}[/]");
-                }
-                catch (Exception ex)
-                {
-                    AnsiConsole.MarkupLine($"[red]Unexpected error: {ex.Message}[/]");
-                }
+                var response = await luduvo.GetUserByIdAsync(id);
+                AnsiConsole.WriteLine(response.ToString());
             });
         }
         else if (option == "Search users by username")
         {
-            var result =AnsiConsole.Ask<string?>("Username:");
-            await AnsiConsole.Status().StartAsync("Awaiting API response...", async _ =>
+            var username = AnsiConsole.Ask<string?>("Username:");
+            await RunWithHandlingAsync(async () =>
             {
-                try
-                {
-                    var response = await luduvo.SearchUsersAsync(result);
-                    foreach (var partialUser in response)
-                    {
-                        AnsiConsole.WriteLine(partialUser.ToString());
-                    }
-                }
-                catch (TooManyRequestsException)
-                {
-                    AnsiConsole.MarkupLine("[yellow]Rate limit reached. Please try again in a moment.[/]");
-                }
-                catch (HttpRequestException ex)
-                {
-                    AnsiConsole.MarkupLine($"[red]Network/API error: {ex.Message}[/]");
-                }
-                catch (Exception ex)
-                {
-                    AnsiConsole.MarkupLine($"[red]Unexpected error: {ex.Message}[/]");
-                }
+                var response = await luduvo.SearchUsersAsync(username);
+                foreach (var partialUser in response)
+                    AnsiConsole.WriteLine(partialUser.ToString());
             });
         }
-        else if (option == "Show recent users")
+        else if (option == "Get user inventory")
         {
-            await AnsiConsole.Status().StartAsync("Awaiting API response...", async _ =>
+            var id = AnsiConsole.Ask<int>("User ID:");
+            var limit = AskOptionalInt("Limit (Enter for none):");
+            var offset = AskOptionalInt("Offset (Enter for none):");
+
+            await RunWithHandlingAsync(async () =>
             {
-                try
-                {
-                    var response = await luduvo.SearchUsersAsync(null,100,0);
-                    foreach (var partialUser in response)
-                    {
-                        AnsiConsole.WriteLine(partialUser.ToString());
-                    }
-                }
-                catch (TooManyRequestsException)
-                {
-                    AnsiConsole.MarkupLine("[yellow]Rate limit reached. Please try again in a moment.[/]");
-                }
-                catch (HttpRequestException ex)
-                {
-                    AnsiConsole.MarkupLine($"[red]Network/API error: {ex.Message}[/]");
-                }
-                catch (Exception ex)
-                {
-                    AnsiConsole.MarkupLine($"[red]Unexpected error: {ex.Message}[/]");
-                }
+                var response = await luduvo.GetUserInventotoryAsync(id, limit, offset);
+                foreach (var inventoryItem in response)
+                    AnsiConsole.WriteLine(inventoryItem.ToString());
             });
-        }
-        else if (option == "Back")
-        {
-            return;
         }
     }
 }
 
 async Task ShowPlacesMenuAsync()
 {
-    var option = AnsiConsole.Prompt(new SelectionPrompt<string>()
-        .Title("Select option")
-        .AddChoices("Get place by id", "Search places", "Back"));
-    if (option == "Get place by id")
+    while (true)
     {
-        var result = AnsiConsole.Ask<uint>("User ID:");
-        await AnsiConsole.Status().StartAsync("Awaiting API response...", async _ =>
+        var option = AnsiConsole.Prompt(new SelectionPrompt<string>()
+            .Title("Select option")
+            .AddChoices("Get place by id", "Search places", "Back"));
+
+        if (option == "Back")
+            return;
+
+        if (option == "Get place by id")
         {
-            try
+            var id = AnsiConsole.Ask<uint>("Place ID:");
+            await RunWithHandlingAsync(async () =>
             {
-                var response = await luduvo.GetPlaceByIdAsync(result);
+                var response = await luduvo.GetPlaceByIdAsync(id);
                 AnsiConsole.WriteLine(response.ToString());
-            }
-            catch (UserNotFoundException)
-            {
-                AnsiConsole.MarkupLine("[red]User was not found.[/]");
-            }
-            catch (TooManyRequestsException)
-            {
-                AnsiConsole.MarkupLine("[yellow]Rate limit reached. Please try again in a moment.[/]");
-            }
-            catch (HttpRequestException ex)
-            {
-                AnsiConsole.MarkupLine($"[red]Network/API error: {ex.Message}[/]");
-            }
-            catch (Exception ex)
-            {
-                AnsiConsole.MarkupLine($"[red]Unexpected error: {ex.Message}[/]");
-            }
-        });
-    }
-    else if (option == "Search places")
-    {
-        var result = AnsiConsole.Ask<string>("Search places:");
-        await AnsiConsole.Status().StartAsync("Awaiting API response...", async _ =>
+            });
+        }
+        else if (option == "Search places")
         {
-            try
+            var query = AnsiConsole.Ask<string>("Search places:");
+            var limit = AskOptionalInt("Limit (Enter for none):");
+            var offset = AskOptionalInt("Offset (Enter for none):");
+
+            await RunWithHandlingAsync(async () =>
             {
-                var response = await luduvo.SearchPlacesAsync(result);
-                foreach (var partialUser in response)
-                {
-                    AnsiConsole.WriteLine(partialUser.ToString());
-                }
-            }
-            catch (TooManyRequestsException)
-            {
-                AnsiConsole.MarkupLine("[yellow]Rate limit reached. Please try again in a moment.[/]");
-            }
-            catch (HttpRequestException ex)
-            {
-                AnsiConsole.MarkupLine($"[red]Network/API error: {ex.Message}[/]");
-            }
-            catch (Exception ex)
-            {
-                AnsiConsole.MarkupLine($"[red]Unexpected error: {ex.Message}[/]");
-            }
-        });
+                var response = await luduvo.SearchPlacesAsync(query, limit, offset);
+                foreach (var place in response)
+                    AnsiConsole.WriteLine(place.ToString());
+            });
+        }
     }
-        
+}
+
+async Task ShowStoreMenuAsync()
+{
+    while (true)
+    {
+        var option = AnsiConsole.Prompt(new SelectionPrompt<string>()
+            .Title("Select option")
+            .AddChoices("Get store item by id", "Search store", "Back"));
+
+        if (option == "Back")
+            return;
+
+        if (option == "Get store item by id")
+        {
+            var id = AnsiConsole.Ask<uint>("Item ID:");
+            await RunWithHandlingAsync(async () =>
+            {
+                var response = await luduvo.GetStoreItemByIdAsync(id);
+                AnsiConsole.WriteLine(response.ToString());
+            });
+        }
+        else if (option == "Search store")
+        {
+            var query = AnsiConsole.Ask<string?>("Query:");
+            var limit = AskOptionalInt("Limit (Enter for none):");
+            var offset = AskOptionalInt("Offset (Enter for none):");
+
+            await RunWithHandlingAsync(async () =>
+            {
+                var response = await luduvo.SearchStoreAsync(query, limit, offset);
+                foreach (var storeItem in response)
+                    AnsiConsole.WriteLine(storeItem.ToString());
+            });
+        }
+    }
+}
+
+static int? AskOptionalInt(string prompt)
+{
+    var value = AnsiConsole.Ask<string>(prompt);
+    if (string.IsNullOrWhiteSpace(value))
+        return null;
+    return int.Parse(value);
+}
+
+static async Task RunWithHandlingAsync(Func<Task> action)
+{
+    await AnsiConsole.Status().StartAsync("Awaiting API response...", async _ =>
+    {
+        try
+        {
+            await action();
+        }
+        catch (UserNotFoundException)
+        {
+            AnsiConsole.MarkupLine("[red]User was not found.[/]");
+        }
+        catch (PlaceNotFoundException)
+        {
+            AnsiConsole.MarkupLine("[red]Place was not found.[/]");
+        }
+        catch (StoreItemNotFoundException)
+        {
+            AnsiConsole.MarkupLine("[red]Store item was not found.[/]");
+        }
+        catch (TooManyRequestsException)
+        {
+            AnsiConsole.MarkupLine("[yellow]Rate limit reached. Please try again in a moment.[/]");
+        }
+        catch (HttpRequestException ex)
+        {
+            AnsiConsole.MarkupLine($"[red]Network/API error: {ex.Message}[/]");
+        }
+        catch (ArgumentOutOfRangeException ex)
+        {
+            AnsiConsole.MarkupLine($"[red]Invalid arguments: {ex.Message}[/]");
+        }
+        catch (FormatException)
+        {
+            AnsiConsole.MarkupLine("[red]Please enter a valid integer for limit/offset.[/]");
+        }
+        catch (Exception ex)
+        {
+            AnsiConsole.MarkupLine($"[red]Unexpected error: {ex.Message}[/]");
+        }
+    });
 }

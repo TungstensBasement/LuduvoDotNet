@@ -6,7 +6,13 @@
   href: tutorial-get-user-by-id.md
 - name: "Tutorial: Search Users"
   href: tutorial-search-users.md
+- name: "Tutorial: Get User Inventory"
+  href: tutorial-get-user-inventory.md
 - name: "Tutorial: Get Place By ID"
   href: tutorial-get-place-by-id.md
 - name: "Tutorial: Search Places"
   href: tutorial-search-places.md
+- name: "Tutorial: Search Store"
+  href: tutorial-search-store.md
+- name: "Tutorial: Get Store Item By ID"
+  href: tutorial-get-store-item-by-id.md

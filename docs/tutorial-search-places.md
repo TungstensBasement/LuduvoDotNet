@@ -13,7 +13,7 @@ var places = await client.SearchPlacesAsync("test");
 Console.WriteLine($"Found {places.Length} places");
 foreach (var place in places)
 {
-    Console.WriteLine($"- {place.title} by {place.owner_username}");
+    Console.WriteLine($"- {place.Title} by {place.OwnerUsername}");
 }
 ```
 
@@ -30,7 +30,7 @@ try
 
     foreach (var place in places)
     {
-        Console.WriteLine($"{place.id}: {place.title} (players: {place.active_players}/{place.max_Players})");
+        Console.WriteLine($"{place.Id}: {place.Title} (players: {place.ActivePlayers}/{place.MaxPlayers})");
     }
 }
 catch (ArgumentOutOfRangeException ex)

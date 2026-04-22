@@ -23,16 +23,28 @@ var user = await client.GetUserByIdAsync(2);
 // User search
 var users = await client.SearchUsersAsync("igor", limit: 20, offset: 0);
 
+// User inventory (experimental)
+var inventory = await client.GetUserInventotoryAsync(2, limit: 20, offset: 0);
+
 // Place by id
 var place = await client.GetPlaceByIdAsync(1);
 
 // Place search
 var places = await client.SearchPlacesAsync("test", limit: 20, offset: 0);
+
+// Store search
+var storeItems = await client.SearchStoreAsync("test", limit: 20, offset: 0);
+
+// Store item by id
+var storeItem = await client.GetStoreItemByIdAsync(14);
 ```
 
 ## Next steps
 
 - Read [Tutorial: Get User By ID](tutorial-get-user-by-id.md)
 - Read [Tutorial: Search Users](tutorial-search-users.md)
+- Read [Tutorial: Get User Inventory](tutorial-get-user-inventory.md)
 - Read [Tutorial: Get Place By ID](tutorial-get-place-by-id.md)
 - Read [Tutorial: Search Places](tutorial-search-places.md)
+- Read [Tutorial: Search Store](tutorial-search-store.md)
+- Read [Tutorial: Get Store Item By ID](tutorial-get-store-item-by-id.md)

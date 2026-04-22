@@ -127,6 +127,88 @@ namespace LuduvoDotNet.Tests
             await Assert.ThrowsAnyAsync<ArgumentOutOfRangeException>(() => luduvo.SearchUsersAsync("abc", limit, offset));
         }
 
+        [Fact]
+        public async Task GetUserInventotoryAsync_Should_HandlePagedObjectResponse()
+        {
+            var json = """
+                       {
+                         "items": [
+                           {
+                             "id": 1,
+                             "item_id": 14,
+                             "thumbnail_url": "",
+                             "price": 0,
+                             "category_id": 4,
+                             "category_name": "Tops",
+                             "category_slug": "tops",
+                             "acquired_at": 1776715216
+                           }
+                         ],
+                         "total": 1,
+                         "limit": 20,
+                         "offset": 0
+                       }
+                       """;
+
+            var handler = new RecordingHandler(_ => new HttpResponseMessage(HttpStatusCode.OK)
+            {
+                Content = new StringContent(json, Encoding.UTF8, "application/json")
+            });
+
+            var luduvo = new Luduvo(new HttpClient(handler) { BaseAddress = new Uri("https://api.luduvo.com") });
+            var items = await luduvo.GetUserInventotoryAsync(2, limit: 20, offset: 0);
+
+            Assert.Single(items);
+            Assert.Equal(14u, items[0].ItemId);
+        }
+
+        [Fact]
+        public async Task GetUserInventotoryAsync_Should_IncludeLimitAndOffsetInQuery()
+        {
+            var handler = new RecordingHandler(_ => new HttpResponseMessage(HttpStatusCode.OK)
+            {
+                Content = new StringContent("{\"items\":[]}", Encoding.UTF8, "application/json")
+            });
+
+            var luduvo = new Luduvo(new HttpClient(handler) { BaseAddress = new Uri("https://api.luduvo.com") });
+            await luduvo.GetUserInventotoryAsync(2, limit: 10, offset: 30);
+
+            Assert.NotNull(handler.LastRequest);
+            Assert.Equal("/users/2/inventory?limit=10&offset=30", handler.LastRequest!.RequestUri!.PathAndQuery);
+        }
+
+        [Fact]
+        public async Task GetUserInventotoryAsync_Should_ThrowUserNotFoundException_WhenApiReturns404()
+        {
+            var httpClient = new HttpClient(new StaticResponseHandler(new HttpResponseMessage(HttpStatusCode.NotFound)
+            {
+                Content = JsonContent.Create(new { error = "user not found" })
+            }))
+            {
+                BaseAddress = new Uri("https://api.luduvo.com")
+            };
+
+            var luduvo = new Luduvo(httpClient);
+
+            await Assert.ThrowsAsync<UserNotFoundException>(() => luduvo.GetUserInventotoryAsync(0, 10, 0));
+        }
+
+        [Theory]
+        [InlineData(0, 0)]
+        [InlineData(-1, 0)]
+        [InlineData(10, -1)]
+        public async Task GetUserInventotoryAsync_Should_ValidateLimitAndOffset(int limit, int offset)
+        {
+            var handler = new RecordingHandler(_ => new HttpResponseMessage(HttpStatusCode.OK)
+            {
+                Content = new StringContent("{\"items\":[]}", Encoding.UTF8, "application/json")
+            });
+
+            var luduvo = new Luduvo(new HttpClient(handler) { BaseAddress = new Uri("https://api.luduvo.com") });
+
+            await Assert.ThrowsAnyAsync<ArgumentOutOfRangeException>(() => luduvo.GetUserInventotoryAsync(2, limit, offset));
+        }
+
         private sealed class StaticResponseHandler(HttpResponseMessage response) : HttpMessageHandler
         {
             protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
