@@ -1,12 +1,71 @@
 ﻿using System.Net;
 using System.Net.Http;
 using System.Net.Http.Json;
+using System.Drawing;
 using System.Text;
+using System.Text.Json;
+using LuduvoDotNet.Records;
 
 namespace LuduvoDotNet.Tests
 {
     public class UserApiTests
     {
+        [Fact]
+        public async Task UpdateMyProfileAsync_Should_SendPutRequestWithExpectedBody()
+        {
+            var handler = new RecordingHandler(_ => new HttpResponseMessage(HttpStatusCode.NoContent));
+            var luduvo = new Luduvo(new HttpClient(handler) { BaseAddress = new Uri("https://api.luduvo.com") });
+
+            var request = new UpdateMyProfileRequest
+            {
+                Status = "Online",
+                Bio = "Hello there",
+                DisplayName = "Igor",
+                AccentColor = Color.FromArgb(255, 170, 187, 204),
+                AllowJoins = true,
+                AdditionalProperties = new Dictionary<string, JsonElement>
+                {
+                    ["custom_field"] = JsonSerializer.SerializeToElement("custom")
+                }
+            };
+
+            await luduvo.UpdateMyProfileAsync(request);
+
+            Assert.NotNull(handler.LastRequest);
+            Assert.Equal(HttpMethod.Put, handler.LastRequest!.Method);
+            Assert.Equal("/me/profile", handler.LastRequest.RequestUri!.PathAndQuery);
+
+            var body = await handler.LastRequest.Content!.ReadAsStringAsync();
+            Assert.Contains("\"status\":\"Online\"", body);
+            Assert.Contains("\"bio\":\"Hello there\"", body);
+            Assert.Contains("\"display_name\":\"Igor\"", body);
+            Assert.Contains("\"accent_color\":\"#AABBCC\"", body);
+            Assert.Contains("\"allow_joins\":true", body);
+            Assert.Contains("\"custom_field\":\"custom\"", body);
+        }
+
+        [Fact]
+        public async Task UpdateMyProfileAsync_Should_ThrowTooManyRequestsException_WhenApiReturns429()
+        {
+            var httpClient = new HttpClient(new StaticResponseHandler(new HttpResponseMessage(HttpStatusCode.TooManyRequests)))
+            {
+                BaseAddress = new Uri("https://api.luduvo.com")
+            };
+
+            var luduvo = new Luduvo(httpClient);
+
+            await Assert.ThrowsAsync<TooManyRequestsException>(() => luduvo.UpdateMyProfileAsync(new UpdateMyProfileRequest()));
+        }
+
+        [Fact]
+        public async Task UpdateMyProfileAsync_Should_ThrowArgumentNullException_WhenRequestIsNull()
+        {
+            var handler = new RecordingHandler(_ => new HttpResponseMessage(HttpStatusCode.NoContent));
+            var luduvo = new Luduvo(new HttpClient(handler) { BaseAddress = new Uri("https://api.luduvo.com") });
+
+            await Assert.ThrowsAsync<ArgumentNullException>(() => luduvo.UpdateMyProfileAsync(null!));
+        }
+
         [Fact]
         public async Task GetUserByIdAsync_Should_ReturnCorrectData()
         {

@@ -64,3 +64,26 @@ Validation rules:
 - `limit`: must be greater than `0` (and at most `100` where enforced by the method).
 - `offset`: must be `0` or greater.
 
+## Profile update
+
+### `UpdateMyProfileAsync(UpdateMyProfileRequest request, CancellationToken cancellationToken = default)`
+
+Updates the authenticated user's profile via `PUT /me/profile`.
+
+```csharp
+await client.UpdateMyProfileAsync(new UpdateMyProfileRequest
+{
+    Status = "Busy",
+    Bio = "Building things",
+    DisplayName = "Tungsten",
+    AccentColor = Color.FromArgb(255, 255, 0, 153),
+    AllowJoins = false
+});
+```
+
+Notes:
+
+- The endpoint uses bearer auth (`Authorization: Bearer <token>`).
+- If a field is omitted in the payload, the API may reset it to `null` or a server default.
+- Additional editable API fields can be sent through `UpdateMyProfileRequest.AdditionalProperties`.
+

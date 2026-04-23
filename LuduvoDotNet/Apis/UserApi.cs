@@ -9,6 +9,26 @@ namespace LuduvoDotNet;
 public partial class Luduvo
 {
     /// <summary>
+    /// Updates the authenticated user's profile via <c>PUT /me/profile</c>.
+    /// Fields omitted from <paramref name="request"/> may be reset by the API to default values.
+    /// </summary>
+    /// <param name="request">Profile update payload.</param>
+    /// <param name="cancellationToken">Optional cancellation token.</param>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="request"/> is null.</exception>
+    /// <exception cref="TooManyRequestsException">Thrown when the API rate limits the request.</exception>
+    /// <exception cref="HttpRequestException">Thrown when the API returns a non-success status code other than 429.</exception>
+    public async Task UpdateMyProfileAsync(UpdateMyProfileRequest request, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+
+        var response = await _httpClient.PutAsJsonAsync("/me/profile", request, _jsonOptions, cancellationToken);
+        if (response.StatusCode == HttpStatusCode.TooManyRequests)
+            throw new TooManyRequestsException();
+
+        response.EnsureSuccessStatusCode();
+    }
+
+    /// <summary>
     /// Fetches a user profile by ID from <c>/users/{userId}/profile</c> and deserializes it into <see cref="User"/>.
     /// </summary>
     /// <param name="userId">The numeric user identifier.</param>

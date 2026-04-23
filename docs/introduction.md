@@ -9,6 +9,7 @@ LuduvoDotNet is a .NET client for the Luduvo API. It provides typed models, asyn
 - User profile lookup with `GetUserByIdAsync`.
 - User search with `SearchUsersAsync` and lightweight `PartialUser` results.
 - User inventory lookup with `GetUserInventotoryAsync` (experimental).
+- Authenticated profile update with `UpdateMyProfileAsync` (`PUT /me/profile`).
 - Place lookup with `GetPlaceByIdAsync`.
 - Place search with `SearchPlacesAsync` (supports pagination via `limit` and `offset`).
 - Store search with `SearchStoreAsync` (supports pagination via `limit` and `offset`).
