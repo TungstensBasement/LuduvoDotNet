@@ -14,6 +14,16 @@ using LuduvoDotNet;
 var client = new Luduvo();
 ```
 
+## Authenticate (optional)
+
+```csharp
+// Login with identifier (username or email) and password.
+var authedClient = await Luduvo.LoginAsync("myUsername", "myPassword");
+
+// Or create a client directly from an access token.
+var tokenClient = new Luduvo("your-access-token");
+```
+
 ## Quick examples
 
 ```csharp
@@ -48,3 +58,4 @@ var storeItem = await client.GetStoreItemByIdAsync(14);
 - Read [Tutorial: Search Places](tutorial-search-places.md)
 - Read [Tutorial: Search Store](tutorial-search-store.md)
 - Read [Tutorial: Get Store Item By ID](tutorial-get-store-item-by-id.md)
+- Read [Luduvo API: Overview](luduvo-api/overview.md)

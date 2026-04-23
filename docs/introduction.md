@@ -4,6 +4,8 @@ LuduvoDotNet is a .NET client for the Luduvo API. It provides typed models, asyn
 
 ## Main features
 
+- Authentication via `Luduvo.LoginAsync(identifier, password)`.
+- Authenticated client creation via `new Luduvo(token)`.
 - User profile lookup with `GetUserByIdAsync`.
 - User search with `SearchUsersAsync` and lightweight `PartialUser` results.
 - User inventory lookup with `GetUserInventotoryAsync` (experimental).
@@ -22,6 +24,15 @@ The client maps selected HTTP statuses to custom exceptions:
 - `429` -> `TooManyRequestsException`
 
 Other non-success responses raise `HttpRequestException` via `EnsureSuccessStatusCode()`.
+
+## Luduvo API (general)
+
+If you also want API-level context (route behavior, payload shape, paging conventions), see:
+
+- [API Overview](luduvo-api/overview.md)
+- [Authentication](luduvo-api/authentication.md)
+- [Endpoints](luduvo-api/endpoints.md)
+- [Pagination and Errors](luduvo-api/pagination-and-errors.md)
 
 ## Learn by examples
 

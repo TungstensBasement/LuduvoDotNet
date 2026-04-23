@@ -2,10 +2,24 @@
 _layout: landing
 ---
 
-# This is the **HOMEPAGE**.
+# LuduvoDotNet
 
-Refer to [Markdown](http://daringfireball.net/projects/markdown/) for how to write markdown files.
+Typed .NET client for the Luduvo API.
 
-## Quick Start Notes:
+## Start here
 
-1. Add images to the *images* folder if the file is referencing an image.
+- [Getting Started](docs/getting-started.md)
+- [Introduction](docs/introduction.md)
+- [API Reference (generated)](api/index.md)
+
+## Key capabilities
+
+- Authenticate with `Luduvo.LoginAsync(identifier, password)` or use `new Luduvo(token)`.
+- Read user profiles with `GetUserByIdAsync`.
+- Search users, places, and store items with optional pagination (`limit`, `offset`).
+- Read inventories with `GetUserInventotoryAsync`.
+
+## External links
+
+- [NuGet package](https://www.nuget.org/packages/LuduvoDotNet/)
+- [GitHub repository](https://github.com/TungstensBasement/LuduvoDotNet)

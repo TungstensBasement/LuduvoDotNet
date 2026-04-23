@@ -1,4 +1,7 @@
-﻿using System.Text.Json;
+﻿using System.Net;
+using System.Net.Http.Headers;
+using System.Net.Http.Json;
+using System.Text.Json;
 
 namespace LuduvoDotNet;
 
@@ -7,6 +10,13 @@ namespace LuduvoDotNet;
 /// </summary>
 public partial class Luduvo
 {
+    private sealed class LoginResponse
+    {
+        public string? Token { get; set; }
+        public string? RefreshToken { get; set; }
+        public JsonElement User { get; set; }
+    }
+
     private static readonly JsonSerializerOptions _jsonOptions = new(JsonSerializerDefaults.Web)
     {
         PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower,
@@ -29,14 +39,33 @@ public partial class Luduvo
     
     public Luduvo(string token):this(_sharedHttpClient)
     {
-        _httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {token}");  
+        _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
     }
 
-    public static Task<Luduvo> LoginAsync(string identifier, string password)
+    public static async Task<Luduvo> LoginAsync(string identifier, string password)
     {
+        if (string.IsNullOrWhiteSpace(identifier))
+            throw new ArgumentException("Identifier cannot be empty.", nameof(identifier));
+        if (string.IsNullOrWhiteSpace(password))
+            throw new ArgumentException("Password cannot be empty.", nameof(password));
+
         _sharedHttpClient.DefaultRequestHeaders.Remove("Authorization");
-        //_sharedHttpClient.PostAsync("/auth/login",)
-        throw new NotImplementedException();
+
+        var response = await _sharedHttpClient.PostAsJsonAsync(
+            "/auth/login",
+            new { identifier, password },
+            _jsonOptions);
+
+        if (response.StatusCode == HttpStatusCode.TooManyRequests)
+            throw new TooManyRequestsException();
+
+        response.EnsureSuccessStatusCode();
+
+        var loginResponse = await response.Content.ReadFromJsonAsync<LoginResponse>(_jsonOptions);
+        if (loginResponse?.Token is null or "")
+            throw new JsonException("Login response did not contain a token.");
+
+        return new Luduvo(loginResponse.Token);
     }
 
     /// <summary>
