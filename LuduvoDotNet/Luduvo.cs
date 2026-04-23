@@ -26,6 +26,18 @@ public partial class Luduvo
     public Luduvo() : this(_sharedHttpClient)
     {
     }
+    
+    public Luduvo(string token):this(_sharedHttpClient)
+    {
+        _httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {token}");  
+    }
+
+    public static Task<Luduvo> LoginAsync(string identifier, string password)
+    {
+        _sharedHttpClient.DefaultRequestHeaders.Remove("Authorization");
+        //_sharedHttpClient.PostAsync("/auth/login",)
+        throw new NotImplementedException();
+    }
 
     /// <summary>
     /// Creates a client that uses a caller-provided <see cref="HttpClient"/> instance.
