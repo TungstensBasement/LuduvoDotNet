@@ -268,6 +268,50 @@ namespace LuduvoDotNet.Tests
             await Assert.ThrowsAnyAsync<ArgumentOutOfRangeException>(() => luduvo.GetUserInventotoryAsync(2, limit, offset));
         }
 
+        [Fact]
+        public async Task GetUserHeadshot_Should_ReturnImageBytes_AndCallExpectedRoute()
+        {
+            var imageBytes = new byte[] { 0x89, 0x50, 0x4E, 0x47 };
+            var handler = new RecordingHandler(_ => new HttpResponseMessage(HttpStatusCode.OK)
+            {
+                Content = new ByteArrayContent(imageBytes)
+            });
+
+            var luduvo = new Luduvo(new HttpClient(handler) { BaseAddress = new Uri("https://api.luduvo.com") });
+            var result = await luduvo.GetUserHeadshot(2);
+
+            Assert.NotNull(handler.LastRequest);
+            Assert.Equal(HttpMethod.Get, handler.LastRequest!.Method);
+            Assert.Equal("/users/2/headshot", handler.LastRequest.RequestUri!.PathAndQuery);
+            Assert.Equal(imageBytes, result);
+        }
+
+        [Fact]
+        public async Task GetUserHeadshot_Should_ThrowUserNotFoundException_WhenApiReturns404()
+        {
+            var httpClient = new HttpClient(new StaticResponseHandler(new HttpResponseMessage(HttpStatusCode.NotFound)))
+            {
+                BaseAddress = new Uri("https://api.luduvo.com")
+            };
+
+            var luduvo = new Luduvo(httpClient);
+
+            await Assert.ThrowsAsync<UserNotFoundException>(() => luduvo.GetUserHeadshot(0));
+        }
+
+        [Fact]
+        public async Task GetUserHeadshot_Should_ThrowTooManyRequestsException_WhenApiReturns429()
+        {
+            var httpClient = new HttpClient(new StaticResponseHandler(new HttpResponseMessage(HttpStatusCode.TooManyRequests)))
+            {
+                BaseAddress = new Uri("https://api.luduvo.com")
+            };
+
+            var luduvo = new Luduvo(httpClient);
+
+            await Assert.ThrowsAsync<TooManyRequestsException>(() => luduvo.GetUserHeadshot(2));
+        }
+
         private sealed class StaticResponseHandler(HttpResponseMessage response) : HttpMessageHandler
         {
             protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)

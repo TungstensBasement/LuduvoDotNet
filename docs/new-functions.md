@@ -87,3 +87,24 @@ Notes:
 - If a field is omitted in the payload, the API may reset it to `null` or a server default.
 - Additional editable API fields can be sent through `UpdateMyProfileRequest.AdditionalProperties`.
 
+## User headshot
+
+### `GetUserHeadshot(int userId, CancellationToken cancellationToken = default)`
+
+Gets the user's headshot image bytes via `GET /users/{userId}/headshot`.
+
+```csharp
+var bytes = await client.GetUserHeadshot(2);
+await File.WriteAllBytesAsync("headshot.png", bytes);
+```
+
+Behavior:
+
+- Returns raw bytes from the API response body.
+- Uses the authenticated or unauthenticated client instance (depending on endpoint requirements on the server).
+
+Exceptions:
+
+- `UserNotFoundException` when API returns `404`.
+- `TooManyRequestsException` when API returns `429`.
+- `HttpRequestException` for other non-success status codes.

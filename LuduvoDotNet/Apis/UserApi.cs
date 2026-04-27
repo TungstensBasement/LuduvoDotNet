@@ -105,10 +105,55 @@ public partial class Luduvo
 
         return Array.Empty<PartialUser>();
     }
-    
+
+    /// <summary>
+    /// Gets a user's headshot image bytes from <c>/users/{userId}/headshot</c>.
+    /// </summary>
+    /// <param name="userId">The numeric user identifier.</param>
+    /// <param name="cancellationToken">Optional cancellation token to cancel the request.</param>
+    /// <returns>Raw image bytes returned by the API.</returns>
+    /// <exception cref="UserNotFoundException">Thrown when the API returns 404.</exception>
+    /// <exception cref="TooManyRequestsException">Thrown when the API rate limits the request.</exception>
+    /// <exception cref="HttpRequestException">Thrown when the API returns a non-success status code other than 404/429.</exception>
+    public async Task<byte[]> GetUserHeadshot(int userId, CancellationToken cancellationToken = default)
+    {
+        var path = $"/users/{userId}/headshot";
+        var response = await _httpClient.GetAsync(path, cancellationToken);
+
+        if (response.StatusCode == HttpStatusCode.NotFound)
+            throw new UserNotFoundException();
+        if (response.StatusCode == HttpStatusCode.TooManyRequests)
+            throw new TooManyRequestsException();
+
+        response.EnsureSuccessStatusCode();
+        return await response.Content.ReadAsByteArrayAsync(cancellationToken);
+    }
+
+    /// <summary>
+    /// Gets a user's inventory from <c>/users/{id}/inventory</c>.
+    /// </summary>
+    /// <param name="id">The numeric user identifier.</param>
+    /// <param name="cancellationToken">Optional cancellation token to cancel the request.</param>
+    /// <returns>An array of <see cref="InventoryItem"/> entries, or an empty array when no items are returned.</returns>
+    /// <exception cref="UserNotFoundException">Thrown when the API returns 404.</exception>
+    /// <exception cref="TooManyRequestsException">Thrown when the API rate limits the request.</exception>
+    /// <exception cref="HttpRequestException">Thrown when the API returns a non-success status code other than 404/429.</exception>
     public Task<InventoryItem[]> GetUserInventotoryAsync(int id, CancellationToken cancellationToken = default)
         => GetUserInventotoryAsync(id, limit: null, offset: null, cancellationToken: cancellationToken);
-    
+
+    /// <summary>
+    /// Gets a user's inventory from <c>/users/{id}/inventory</c> with optional pagination.
+    /// Supports both API response formats: direct array and paged object with <c>items</c> array.
+    /// </summary>
+    /// <param name="id">The numeric user identifier.</param>
+    /// <param name="limit">Optional page size. Must be greater than 0 and less or equal 100 when provided.</param>
+    /// <param name="offset">Optional result offset. Must be 0 or greater when provided.</param>
+    /// <param name="cancellationToken">Optional cancellation token to cancel the request.</param>
+    /// <returns>An array of <see cref="InventoryItem"/> entries, or an empty array when no items are returned.</returns>
+    /// <exception cref="ArgumentOutOfRangeException">Thrown when <paramref name="limit"/> or <paramref name="offset"/> are outside valid range.</exception>
+    /// <exception cref="UserNotFoundException">Thrown when the API returns 404.</exception>
+    /// <exception cref="TooManyRequestsException">Thrown when the API rate limits the request.</exception>
+    /// <exception cref="HttpRequestException">Thrown when the API returns a non-success status code other than 404/429.</exception>
     public async Task<InventoryItem[]> GetUserInventotoryAsync(int id, int? limit, int? offset, CancellationToken cancellationToken = default)
     {
         if (limit is <= 0 or > 100)

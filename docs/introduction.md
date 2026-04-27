@@ -7,6 +7,7 @@ LuduvoDotNet is a .NET client for the Luduvo API. It provides typed models, asyn
 - Authentication via `Luduvo.LoginAsync(identifier, password)`.
 - Authenticated client creation via `new Luduvo(token)`.
 - User profile lookup with `GetUserByIdAsync`.
+- User headshot download with `GetUserHeadshot`.
 - User search with `SearchUsersAsync` and lightweight `PartialUser` results.
 - User inventory lookup with `GetUserInventotoryAsync` (experimental).
 - Authenticated profile update with `UpdateMyProfileAsync` (`PUT /me/profile`).
