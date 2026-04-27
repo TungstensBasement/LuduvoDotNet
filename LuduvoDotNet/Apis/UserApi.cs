@@ -107,26 +107,58 @@ public partial class Luduvo
     }
 
     /// <summary>
-    /// Gets a user's headshot image bytes from <c>/users/{userId}/headshot</c>.
+    /// Gets a user's headshot image bytes from <c>/users/{userId}/avatar/headshot</c>.
+    /// Handles redirect responses by following the <c>Location</c> header.
     /// </summary>
     /// <param name="userId">The numeric user identifier.</param>
     /// <param name="cancellationToken">Optional cancellation token to cancel the request.</param>
     /// <returns>Raw image bytes returned by the API.</returns>
     /// <exception cref="UserNotFoundException">Thrown when the API returns 404.</exception>
     /// <exception cref="TooManyRequestsException">Thrown when the API rate limits the request.</exception>
-    /// <exception cref="HttpRequestException">Thrown when the API returns a non-success status code other than 404/429.</exception>
+    /// <exception cref="HttpRequestException">Thrown when the API returns a non-success status code other than 404/429, redirect metadata is invalid, or redirect limit is exceeded.</exception>
     public async Task<byte[]> GetUserHeadshot(int userId, CancellationToken cancellationToken = default)
     {
-        var path = $"/users/{userId}/headshot";
-        var response = await _httpClient.GetAsync(path, cancellationToken);
+        static bool IsRedirect(HttpStatusCode code) =>
+            code is HttpStatusCode.MovedPermanently
+                or HttpStatusCode.Redirect
+                or HttpStatusCode.RedirectMethod
+                or HttpStatusCode.TemporaryRedirect
+                or HttpStatusCode.PermanentRedirect;
 
-        if (response.StatusCode == HttpStatusCode.NotFound)
-            throw new UserNotFoundException();
-        if (response.StatusCode == HttpStatusCode.TooManyRequests)
-            throw new TooManyRequestsException();
+        const int maxRedirects = 5;
+        Uri requestUri = new($"/users/{userId}/avatar/headshot", UriKind.Relative);
 
-        response.EnsureSuccessStatusCode();
-        return await response.Content.ReadAsByteArrayAsync(cancellationToken);
+        for (var redirectCount = 0; redirectCount <= maxRedirects; redirectCount++)
+        {
+            using var response = await _httpClient.GetAsync(requestUri, cancellationToken);
+
+            if (response.StatusCode == HttpStatusCode.NotFound)
+                throw new UserNotFoundException();
+            if (response.StatusCode == HttpStatusCode.TooManyRequests)
+                throw new TooManyRequestsException();
+
+            if (IsRedirect(response.StatusCode))
+            {
+                var location = response.Headers.Location
+                    ?? throw new HttpRequestException("Headshot redirect did not include a Location header.");
+
+                if (!location.IsAbsoluteUri)
+                {
+                    if (_httpClient.BaseAddress is null)
+                        throw new HttpRequestException("Cannot resolve relative headshot redirect URI because HttpClient.BaseAddress is null.");
+
+                    location = new Uri(_httpClient.BaseAddress, location);
+                }
+
+                requestUri = location;
+                continue;
+            }
+
+            response.EnsureSuccessStatusCode();
+            return await response.Content.ReadAsByteArrayAsync(cancellationToken);
+        }
+
+        throw new HttpRequestException($"Too many redirects while fetching user headshot (max: {maxRedirects}).");
     }
 
     /// <summary>

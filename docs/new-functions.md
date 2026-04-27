@@ -91,7 +91,7 @@ Notes:
 
 ### `GetUserHeadshot(int userId, CancellationToken cancellationToken = default)`
 
-Gets the user's headshot image bytes via `GET /users/{userId}/headshot`.
+Gets the user's headshot image bytes via `GET /users/{userId}/avatar/headshot`.
 
 ```csharp
 var bytes = await client.GetUserHeadshot(2);
@@ -101,6 +101,7 @@ await File.WriteAllBytesAsync("headshot.png", bytes);
 Behavior:
 
 - Returns raw bytes from the API response body.
+- If the API responds with a redirect (for example `302`), the client follows the `Location` and returns bytes from the redirected resource.
 - Uses the authenticated or unauthenticated client instance (depending on endpoint requirements on the server).
 
 Exceptions:

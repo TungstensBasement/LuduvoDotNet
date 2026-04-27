@@ -282,8 +282,50 @@ namespace LuduvoDotNet.Tests
 
             Assert.NotNull(handler.LastRequest);
             Assert.Equal(HttpMethod.Get, handler.LastRequest!.Method);
-            Assert.Equal("/users/2/headshot", handler.LastRequest.RequestUri!.PathAndQuery);
+            Assert.Equal("/users/2/avatar/headshot", handler.LastRequest.RequestUri!.PathAndQuery);
             Assert.Equal(imageBytes, result);
+        }
+
+        [Fact]
+        public async Task GetUserHeadshot_Should_FollowRedirect_WhenApiReturns302()
+        {
+            var imageBytes = new byte[] { 0x89, 0x50, 0x4E, 0x47 };
+            var callCount = 0;
+
+            var handler = new RecordingHandler(request =>
+            {
+                callCount++;
+
+                if (callCount == 1)
+                {
+                    Assert.Equal("/users/2/avatar/headshot", request.RequestUri!.PathAndQuery);
+                    return new HttpResponseMessage(HttpStatusCode.Redirect)
+                    {
+                        Headers = { Location = new Uri("/cdn/headshots/2.png", UriKind.Relative) }
+                    };
+                }
+
+                Assert.Equal("/cdn/headshots/2.png", request.RequestUri!.PathAndQuery);
+                return new HttpResponseMessage(HttpStatusCode.OK)
+                {
+                    Content = new ByteArrayContent(imageBytes)
+                };
+            });
+
+            var luduvo = new Luduvo(new HttpClient(handler) { BaseAddress = new Uri("https://api.luduvo.com") });
+            var result = await luduvo.GetUserHeadshot(2);
+
+            Assert.Equal(2, callCount);
+            Assert.Equal(imageBytes, result);
+        }
+
+        [Fact]
+        public async Task GetUserHeadshot_Should_ThrowHttpRequestException_WhenRedirectHasNoLocation()
+        {
+            var handler = new RecordingHandler(_ => new HttpResponseMessage(HttpStatusCode.Redirect));
+            var luduvo = new Luduvo(new HttpClient(handler) { BaseAddress = new Uri("https://api.luduvo.com") });
+
+            await Assert.ThrowsAsync<HttpRequestException>(() => luduvo.GetUserHeadshot(2));
         }
 
         [Fact]
